@@ -3,6 +3,8 @@
 //
 // DirectX 11 Star Citizen Texture Converter
 // D. Fisher (Jan 2017)
+// Updated 03APR2018 by TJ Long (FiendishFeather)
+// Fixed a bug with the tool not properly converting the Gloss of ddna files
 //
 // A modified (poorly) version of DirectX11 Texture Converter,
 // Copyright (c) Microsoft Corporation. All rights reserved.
@@ -42,8 +44,8 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 
-LPCWSTR VERSION = L"1.3";
-std::string	sVERSION = "1.3";
+LPCWSTR VERSION = L"1.31";
+std::string	sVERSION = "1.31";
 
 enum OPTIONS    // Note: dwOptions below assumes 64 or less options.
 {
@@ -2318,6 +2320,12 @@ bool ReassembleDDS(SUnsplitFileNameInfo &info, SUFileData &data, SUnsplitOptions
 	if ((options.Umode == UNSPLIT_MODE_FIRST) && !(data.bIsGloss)) {
 		RenameFile(info.sNameAllExt, info.sBaseName + ".0", true);
 	}
+
+	//Fiend: The Gloss of a DDNA file is kept in a .a file so it has to be renamed accordingly like the others
+	if ((options.Umode == UNSPLIT_MODE_FIRST) && (data.bIsGloss)) {
+		RenameFile(info.sNameAllExt, info.sBaseName + ".0a", true);
+	}
+
 	
 	string outName = (data.bIsGloss ? info.sDirectory + info.sGlossName : info.sDirectory + info.sBaseName);
 	
@@ -3007,7 +3015,7 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
 
 	time_t now;
 	time_t elapsed;
-	uint hrs, min, sec, remain; 
+	UINT hrs, min, sec, remain; 
 	string fmtHour, fmtMin, fmtSec;
 
 	// Log file filename time-stamp is UNIX-style (i.e. number of seconds since 1st Jan 1970)	
