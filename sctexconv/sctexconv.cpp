@@ -46,8 +46,8 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 
-LPCWSTR VERSION = L"1.32";
-std::string	sVERSION = "1.32";
+LPCWSTR VERSION = L"1.3.2";
+std::string	sVERSION = "1.3.2";
 
 enum OPTIONS    // Note: dwOptions below assumes 64 or less options.
 {
