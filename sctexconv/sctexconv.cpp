@@ -3,8 +3,9 @@
 //
 // DirectX 11 Star Citizen Texture Converter
 // D. Fisher (Jan 2017)
-// Updated 03APR2018 by TJ Long (FiendishFeather)
+// Updated 05APR2018 by TJ Long (FiendishFeather)
 // Fixed a bug with the tool not properly converting the Gloss of ddna files
+// Fixed a bug where openCV reads the gloss and normal map at 1/2 resolution when it exports the merged file
 //
 // A modified (poorly) version of DirectX11 Texture Converter,
 // Copyright (c) Microsoft Corporation. All rights reserved.
@@ -36,6 +37,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include "opencv2/imgproc/imgproc.hpp"
 #include "directxtex.h"
 #include "directxtexp.h"
 #include "Unsplit.h"
@@ -44,8 +46,8 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 
-LPCWSTR VERSION = L"1.31";
-std::string	sVERSION = "1.31";
+LPCWSTR VERSION = L"1.32";
+std::string	sVERSION = "1.32";
 
 enum OPTIONS    // Note: dwOptions below assumes 64 or less options.
 {
@@ -2594,6 +2596,10 @@ bool MergeGlossWithNormal(string norm, string gloss, string logfile)
 	imgNorm = cv::imread(norm, CV_8UC4);
 	imgGloss = cv::imread(gloss, CV_8UC4);
 
+	//Fiend: Need to resize the mats becuase openCV reads then as 1/2 the size
+	cv::resize(imgNorm, imgNorm, cv::Size(), 2, 2);
+	cv::resize(imgGloss, imgGloss, cv::Size(), 2, 2);
+
 	// check for equal img dimensions
 	if (imgNorm.cols != imgGloss.cols || imgNorm.rows != imgGloss.rows)
 	{
@@ -2617,11 +2623,13 @@ bool MergeGlossWithNormal(string norm, string gloss, string logfile)
 	channels[2] = vecRGBA[2];
 	channels[3] = glossRGBA[0];
 
-	cv::Mat imgOut(imgNorm.rows, imgNorm.cols, CV_8UC4);
-	
-	cv::merge(channels, 4, imgOut);
+	cv::Size size(imgNorm.rows, imgNorm.cols);
 
-	cv::imwrite(norm, imgOut);
+	cv::Mat mat(size, CV_8UC4);
+
+	cv::merge(channels, 4, mat);
+
+	cv::imwrite(norm, mat);
 
 	return true;
 }
