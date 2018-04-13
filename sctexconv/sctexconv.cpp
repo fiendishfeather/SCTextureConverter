@@ -3,9 +3,10 @@
 //
 // DirectX 11 Star Citizen Texture Converter
 // D. Fisher (Jan 2017)
-// Updated 05APR2018 by TJ Long (FiendishFeather)
+// Updated 13APR2018 by TJ Long (FiendishFeather)
 // Fixed a bug with the tool not properly converting the Gloss of ddna files
 // Fixed a bug where openCV reads the gloss and normal map at 1/2 resolution when it exports the merged file
+// Fixed a bug where the program would ignore files with dashes, dots, or spaces
 //
 // A modified (poorly) version of DirectX11 Texture Converter,
 // Copyright (c) Microsoft Corporation. All rights reserved.
@@ -46,8 +47,8 @@ using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 
-LPCWSTR VERSION = L"1.3.2";
-std::string	sVERSION = "1.3.2";
+LPCWSTR VERSION = L"1.3.3";
+std::string	sVERSION = "1.3.3";
 
 enum OPTIONS    // Note: dwOptions below assumes 64 or less options.
 {
@@ -3071,7 +3072,8 @@ int __cdecl wmain(_In_ int argc, _In_z_count_(argc) wchar_t* argv[])
 #pragma endregion	
 
 	// Using regex to split the file path into its components
-	regex rgx(R"(^(.*)\\(\w+)(.[dD][dD][sS])([.][0])*$)"); 
+	//Fiend: Update expression to not ignore dashes dots or spaces
+	regex rgx(R"(^(.*)\\([\w\-\ \.]+)(.[dD][dD][sS])([.][0])*$)"); 
 	
 	smatch mch;
 	int index = 0;
